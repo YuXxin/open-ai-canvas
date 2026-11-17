@@ -4,6 +4,7 @@ import { Button, Image } from "antd";
 import { FileText, Image as ImageIcon, Music2, Pencil, Sparkles, Video, X } from "lucide-react";
 
 import { canvasThemes } from "@/lib/canvas-theme";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 import { isCanvasWorkflowProvider } from "@/lib/canvas/canvas-workflow";
 import { useThemeStore } from "@/stores/use-theme-store";
 import type { CanvasResourceReference } from "@/lib/canvas/canvas-resource-references";
@@ -217,6 +218,7 @@ export function CanvasConfigComposer({ value, inputs, skillReferences = [], gene
                     }}
                     onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
                         event.stopPropagation();
+                        if (composingRef.current || isComposingKeyEvent(event.nativeEvent)) return;
                         if (event.key === "/" && !mention) window.setTimeout(() => setPresetOpen(true));
                         if (mention && candidates.length) {
                             if (event.key === "ArrowDown") {

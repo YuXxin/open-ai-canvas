@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { Switch } from "antd";
 
 import { ImageSettingsTheme } from "@/components/image-settings-panel";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 import { boolConfig, isSeedanceFastModel, isSeedanceVideoConfig, normalizeSeedanceDuration, normalizeSeedanceRatio, normalizeSeedanceResolution, seedanceRatioOptions } from "@/lib/seedance-video";
 import { type CanvasTheme } from "@/lib/canvas-theme";
 import { formatVideoResolutionLabel, normalizeVideoDuration, videoDimensionsForRatioAndResolution, videoResolutionComparisonKey, VIDEO_DURATION_MIN } from "@/lib/video-generation-options";
@@ -252,6 +253,7 @@ function DurationInput({ value, min, max, theme, onChange }: { value: number; mi
                 className="min-w-0 flex-1 bg-transparent pl-2 text-right outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 onBlur={(event) => commit(event.currentTarget)}
                 onKeyDown={(event) => {
+                    if (isComposingKeyEvent(event.nativeEvent)) return;
                     if (event.key === "Enter") event.currentTarget.blur();
                 }}
                 onMouseDown={(event) => event.stopPropagation()}

@@ -19,6 +19,7 @@ import { createClientId } from "@/lib/client-id";
 import { generationErrorCode, generationErrorMessage } from "@/lib/generation-error";
 import { useCopyText } from "@/hooks/use-copy-text";
 import { useExternalAssetSources } from "@/hooks/use-external-asset-sources";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { buildImageResolutionOptions, formatImageResolutionSize, imageRatioForSize, imageResolutionChoices, imageResolutionOption, imageSizeForResolution, supportsImageResolutionPresets, type ImageResolutionChoice } from "@/lib/image-resolution-tiers";
 import { formatVideoResolutionLabel as videoResolutionLabel, VIDEO_RESOLUTION_OPTIONS } from "@/lib/video-generation-options";
 import { modelCapabilityConfigFor, normalizeImageValue, normalizeVideoValue, videoDurationAllowed, videoDurationOptions, type ImageCapabilityConfig, type VideoCapabilityConfig } from "@/lib/model-capabilities";
@@ -1196,7 +1197,7 @@ function CreationComposer(props: ComposerProps) {
     const [previewType, setPreviewType] = useState<"image" | "video">("image");
     const [promptOptimizerOpen, setPromptOptimizerOpen] = useState(false);
     const [referenceFilter, setReferenceFilter] = useState<CreationReferenceFilter>("all");
-    const [canDragReferences, setCanDragReferences] = useState(false);
+    const canDragReferences = useMediaQuery("(hover: hover) and (pointer: fine)");
     const [dropTargetReferenceId, setDropTargetReferenceId] = useState<string | null>(null);
     const attachmentTrackRef = useRef<HTMLUListElement>(null);
     const cardDragRef = useRef<{ startX: number; startY: number; moved: boolean } | null>(null);
@@ -1254,13 +1255,6 @@ function CreationComposer(props: ComposerProps) {
         if (!props.attachments.length) setReferencePanelExpanded(false);
         updateTrackScrollState();
     }, [props.attachments.length, setReferencePanelExpanded, updateTrackScrollState]);
-    useEffect(() => {
-        const query = window.matchMedia("(hover: hover) and (pointer: fine)");
-        const update = () => setCanDragReferences(query.matches);
-        update();
-        query.addEventListener("change", update);
-        return () => query.removeEventListener("change", update);
-    }, []);
     useEffect(() => {
         const frame = window.requestAnimationFrame(updateTrackScrollState);
         return () => window.cancelAnimationFrame(frame);

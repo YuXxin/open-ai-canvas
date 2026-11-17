@@ -3,6 +3,7 @@ import { Input, Modal } from "antd";
 import { AudioLines, BookOpenText, Clock3, FileText, Image, Pencil, Search, Video } from "lucide-react";
 
 import { WorkspaceState } from "@/components/layout/workspace-state";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 import { canvasNodeMaterialSummary, canvasNodeSearchContext, canvasNodeSearchTimes, searchCanvasNodes } from "@/lib/canvas/canvas-node-search";
 import { getNodeListLabel } from "@/lib/canvas/node-registry";
 import { CanvasNodeType, type CanvasNodeData } from "@/types/canvas";
@@ -24,6 +25,7 @@ export function CanvasNodeSearchModal({ open, nodes, onClose, onFocus }: { open:
     };
 
     const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+        if (isComposingKeyEvent(event.nativeEvent)) return;
         if (event.key === "ArrowDown") {
             event.preventDefault();
             setActiveIndex((current) => Math.min(results.length - 1, current + 1));

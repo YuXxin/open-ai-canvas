@@ -1,0 +1,74 @@
+# 现代 Web 前端重构
+
+参考：[GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance)。本轮在 `web/` 落实现有功能的输入法安全、原生对话框和响应式状态订阅，保持现有 React、Ant Design、路由与业务 API 分层。
+
+## 扫描与处理结果
+
+对 `web/src` 执行 `legacy-scan --json`，扫描前 66 项候选，修改后 55 项；输入法规则从 11 项降到 0 项。该扫描覆盖 38 个指南、52 条确定性规则，约占指南库的 20%，结果不是全项目缺陷数量，也不代表完整性能或无障碍审计。
+
+| 规则 | 初次候选 | 处理 |
+| --- | ---: | --- |
+| 输入法期间 Enter 触发提交或编辑完成 | 11 | 已统一保护；补查扫描范围外的命令搜索、节点搜索、尺寸选择及富文本引用操作 |
+| 复制后排序、倒序或查找 | 45 | 保留。本轮未统一最低浏览器版本，现有 TypeScript target 仍为 ES2018，不批量引入更新的运行时 API |
+| 包装异常缺少 cause | 5 | 后续核查错误报告、脱敏及调用合同后单独处理 |
+| 对象分组 | 1 | 保留，待确定运行时支持策略后评估 Object.groupBy |
+| 外部持有 Promise resolve | 2 | 保留，待确定运行时支持策略后评估 Promise.withResolvers |
+| 字节转字符 | 2 | 保留。现有用途是固定长度的 GIF、RIFF、WEBP 文件头识别，不是 UTF-8 正文解码 |
+
+## 输入法与快捷键
+
+`web/src/lib/keyboard.ts` 的 `isComposingKeyEvent` 同时检查原生 `isComposing` 和 `keyCode === 229`。后者用于 Safari 中组合结束事件先于确认键处理的情况，不迁移其他普通快捷键回已弃用的 keyCode。
+
+输入法选字期间，重命名、搜索定位、尺寸输入和引用候选不会抢占 Enter、方向键、Escape 或 Tab。富文本编辑器保留已有 composition 状态记录，组合结束后继续由正常输入流程同步内容。原有鼠标保存、失焦保存与提交入口继续可用。
+
+画布的全局键盘和粘贴监听遇到打开的原生对话框时让出控制，滚轮和指针忽略边界也包含 `dialog[open]`。
+
+## 命令搜索面板
+
+`WorkspaceCommandPalette` 使用原生 `dialog.showModal()`。页面惰性状态、顶层显示、焦点范围、Escape 和焦点返回由浏览器提供；组件通过原生 close 事件同步 React 状态。
+
+- 在 layout effect 中打开并在卸载前关闭，防止面板移除后丢失焦点返回。React StrictMode 重放产生的延迟 close 事件，在对话框已经重新打开时忽略。
+- 输入框提供 combobox、listbox 与当前候选之间的 ARIA 关联；方向键仅在输入框内选择候选，关闭按钮的 Enter 不会误执行候选。
+- `closedby="any"` 提供原生外部点击关闭。不支持 closedBy 的环境通过指针坐标检测降级，要求同一指针在内容外按下并释放；内容空白、内边距及拖选结束在外部均不关闭。
+- 面板和 backdrop 使用组件限定的滚动链约束，不修改 body 或 html 的 overflow。
+- 使用动态视口高度限制面板和结果区；CSS 沿用项目 token。没有为本轮新增装饰性入场动效。
+
+## 响应式订阅
+
+`useMediaQuery` 通过 `useSyncExternalStore` 订阅 `MediaQueryList` 的 change 事件，不在每次 resize 时设置断点状态。订阅函数保持稳定，卸载和查询变更时移除监听，服务端快照为 false。
+
+工作区侧栏、画布 Dock、专注模式和创作附件拖动共用该订阅。实际几何测量、画布缩放与浮层位置所需的 ResizeObserver 和 resize 监听继续承担原有职责。
+
+窄屏自动专注独立于用户偏好：从窄屏回到宽屏恢复用户选择，首次在窄屏打开不会永久记住自动专注。localStorage 读取或写入被禁用时，手动切换仍能在当前会话使用。
+
+## 验证与复现
+
+在 `web/` 安装现有依赖后运行：
+
+```sh
+bun install --frozen-lockfile
+bun run typecheck
+bun run test:modern-web
+bunx playwright install chromium
+bun run test:modern-web:browser
+bunx vite build
+```
+
+Playwright 仅作为开发测试依赖；没有新增应用运行时依赖。浏览器测试用独立临时测试服务挂载真实 UI 组件，以固定功能开关替代登录状态，不访问后端、模型或真实账号。测试服务和浏览器在结束或失败时关闭。
+
+| 检查 | 结果 | 边界 |
+| --- | --- | --- |
+| TypeScript | 通过 | 前端源码 |
+| 专项测试 | 24 项通过 | 键盘组合状态、SSR 快照、节点搜索、引用编辑与附件流程 |
+| Chromium 浏览器检查 | 9 组通过 | StrictMode、IME 事件、焦点与关闭、外部点击降级、断点、持久化、监听清理、窄屏与存储禁用 |
+| Vite 生产构建 | 通过 | 仍有大于 500 kB 的 chunk 提示；未执行依赖 Go 的本机 ComfyBridge 打包 |
+| 规则复扫 | 11 → 0 | 输入法规则；其他保留项见上表 |
+
+浏览器测试通过合成 KeyboardEvent 验证组合态分支，并在 Chromium 中主动移除 closedBy 接口验证降级分支；这些检查不能替代真实中文输入法、Safari、Firefox、屏幕阅读器和真实登录页面回归。样式测试使用最小夹具，完整明暗主题的外观仍需在应用中确认。
+
+## 后续边界
+
+- 为真实目标设备明确最低浏览器版本，再决定 toSorted、Object.groupBy 和 Promise.withResolvers 的采用范围。
+- 结合构建体积和实际 LCP、INP、CLS 测量评估重型编辑器、3D 和语法高亮的加载边界。
+- 自绘内容、带引用标签的输入框和 Ant Design 嵌套浮层需要单独评估；field-sizing 或原生 popover 的替换应包含原有高度回调、门户和键盘合同。
+- 真实手工回归入口见 `docs/content/docs/progress/pending-test.mdx`。

@@ -5,6 +5,7 @@ import { AlertCircle, BookOpenCheck, CheckCircle2, ChevronRight, Clapperboard, C
 import { useCanvasNodeActions } from "./canvas-node-action-context";
 
 import { canvasThemes } from "@/lib/canvas-theme";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 import { storyboardMinNodeHeight } from "@/lib/canvas/canvas-storyboard-layout";
 import { resourceStorageLabel, resourceStorageLocation, resourceStorageTitle } from "@/lib/canvas/resource-storage-status";
 import { useThemeStore } from "@/stores/use-theme-store";
@@ -659,6 +660,7 @@ function NodeExternalHeader({ node, scale, dimensionLabel, active, editable, edi
                         onFocus={(event) => event.currentTarget.select()}
                         onBlur={onCommit}
                         onKeyDown={(event) => {
+                            if (isComposingKeyEvent(event.nativeEvent)) return;
                             if (event.key === "Enter") event.currentTarget.blur();
                             if (event.key === "Escape") onCancel();
                         }}

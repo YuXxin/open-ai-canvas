@@ -2,6 +2,7 @@ import { type ReactNode, useState } from "react";
 import { ConfigProvider, Switch } from "antd";
 
 import { type CanvasTheme } from "@/lib/canvas-theme";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 import { buildImageResolutionOptions, formatImageResolutionSize, imageRatioForSize, imageResolutionChoices, imageResolutionOption, imageSizeForResolution, supportsImageResolutionPresets, type ImageResolutionChoice } from "@/lib/image-resolution-tiers";
 import { modelCapabilityConfigFor, normalizeImageValue, type ImageCapabilityConfig } from "@/lib/model-capabilities";
 import { mergedImageCapabilityConfig } from "@/lib/model-selection";
@@ -313,6 +314,7 @@ function DimensionInput({ prefix, value, disabled, theme, alignToStep, onChange 
                 key={`${prefix}-${value}`}
                 onBlur={(event) => commit(event.currentTarget)}
                 onKeyDown={(event) => {
+                    if (isComposingKeyEvent(event.nativeEvent)) return;
                     if (event.key === "Enter") event.currentTarget.blur();
                 }}
                 onMouseDown={(event) => event.stopPropagation()}
@@ -341,6 +343,7 @@ function CountInput({ value, quickCount, max, theme, onChange }: { value: number
                 defaultValue={value > quickCount ? value : ""}
                 onBlur={(event) => commit(event.currentTarget)}
                 onKeyDown={(event) => {
+                    if (isComposingKeyEvent(event.nativeEvent)) return;
                     if (event.key === "Enter") event.currentTarget.blur();
                 }}
                 onMouseDown={(event) => event.stopPropagation()}

@@ -105,6 +105,9 @@
 - 第三方覆盖限定在具体组件，不新增全局 `.ant-modal-*`、`.dark .ant-switch-*`、`.ant-checkbox-*` 或 Segmented 状态补丁。新增 CSS 前先搜索同名选择器，回到唯一源规则修改。
 - 遵循 `docs/ui-design-system.md` 及项目三层 token：Primitive → Semantic → Component。inline style 优先引用 `var(--token-name)`，不要散落颜色、圆角、阴影和层级字面值。
 - 主操作、普通选中、Checkbox/Radio、Switch 是不同颜色角色；持久切换使用 `aria-pressed`，`type="primary"` 只表示当前主要命令。尊重 `prefers-reduced-motion`，键盘导航保留 `:focus-visible`。
+- 自定义文本输入快捷键先通过 `web/src/lib/keyboard.ts` 的 `isComposingKeyEvent` 判断组合状态；富文本继续保留自身 composition 状态，不能让 Enter、方向键或 Escape 抢占输入法选字。
+- 只判断视口断点或输入设备时复用 `useMediaQuery`；实际元素尺寸测量继续使用 ResizeObserver，不把几何计算改成媒体查询。
+- 新增模态交互优先评估原生 `dialog.showModal()`，同步原生 close 与 React 状态，并覆盖画布事件隔离。非广泛支持的新能力必须包含特性检测与降级；采用依据和回归方式见 [现代 Web 前端重构](docs/design/modern-web-refactor.mdx)。
 
 ## 7. 本地开发、部署和数据目录
 

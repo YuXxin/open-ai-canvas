@@ -4,6 +4,8 @@
 
 ## 设计沉淀
 
+- [现代 Web 前端重构](design/modern-web-refactor.mdx)：输入法安全、原生命令搜索、响应式订阅、扫描取舍与验证边界。
+
 - [工作区外壳设计沉淀](design/workspace-shell-design.mdx)：侧栏（260px 可折叠导航 + 分组折叠）、主区卡片、顶部栏（账户/公告/主题）的设计决策与样式约束。
 
 - [画布节点可读性设计沉淀](design/canvas-node-visual-contrast.mdx)：节点外壳、空态和图片创作面板在浅色/深色画布上的表面、边界、阴影与控件状态约束。

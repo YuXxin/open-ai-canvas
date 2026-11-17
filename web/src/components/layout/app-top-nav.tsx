@@ -8,6 +8,7 @@ import { readWorkspaceSidebarCollapsed, writeWorkspaceSidebarCollapsed } from "@
 import { WorkspaceTopBar } from "@/components/layout/workspace-top-bar";
 import { cn } from "@/lib/utils";
 import { isSpatialWorkbenchPath } from "@/lib/workspace-routes";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export function AppWorkspaceShell({ children }: { children: ReactNode }) {
     const { pathname } = useLocation();
@@ -21,10 +22,10 @@ export function AppWorkspaceShell({ children }: { children: ReactNode }) {
     const spatialWorkbench = isSpatialWorkbenchPath(pathname);
     const creationWorkspace = pathname === "/create";
 
-    const isMobileViewport = () => window.innerWidth < 1024;
+    const isMobileViewport = useMediaQuery("(width < 1024px)");
 
     const toggleSidebar = () => {
-        if (isMobileViewport()) {
+        if (isMobileViewport) {
             setMobileSidebarExpanded((current) => !current);
             return;
         }
@@ -41,7 +42,7 @@ export function AppWorkspaceShell({ children }: { children: ReactNode }) {
     };
 
     const handleNavClick = () => {
-        if (isMobileViewport()) setMobileSidebarExpanded(false);
+        if (isMobileViewport) setMobileSidebarExpanded(false);
     };
 
     // ⌘K / Ctrl+K 全局呼出搜索面板。
@@ -91,7 +92,7 @@ export function AppWorkspaceShell({ children }: { children: ReactNode }) {
                     ) : null}
 
                     <div className="app-workspace-stage relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-                        {showGlobalTopBar ? <WorkspaceTopBar sidebarOpen={isMobileViewport() ? mobileSidebarExpanded : !desktopSidebarCollapsed} onToggleSidebar={toggleSidebar} /> : null}
+                        {showGlobalTopBar ? <WorkspaceTopBar sidebarOpen={isMobileViewport ? mobileSidebarExpanded : !desktopSidebarCollapsed} onToggleSidebar={toggleSidebar} /> : null}
                         <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
                     </div>
                 </div>

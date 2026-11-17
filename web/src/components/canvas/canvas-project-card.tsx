@@ -11,6 +11,7 @@ import { resourceFileUrl, resourceIdFromStorageKey } from "@/services/api/resour
 import { resolveBackendApiUrl } from "@/stores/use-config-store";
 import { CachedResourceImage } from "@/components/cached-resource-image";
 import { cn } from "@/lib/utils";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 
 export function CanvasCreateCard({ disabled, onClick }: { disabled?: boolean; onClick: () => void }) {
     return <button type="button" className="app-canvas-create-card" disabled={disabled} onClick={onClick}>
@@ -61,7 +62,10 @@ export function CanvasProjectCard({ project, projectName, variant = "library", r
             <div className={cn("app-canvas-project-body", compact ? "is-compact" : "")}>
                 <div className="canvas-project-heading-row">
                     {editing && !readOnly ? (
-                        <Input className="canvas-project-title-input" value={editingTitle} onClick={(event) => event.stopPropagation()} onChange={(event) => setEditingTitle(event.target.value)} onKeyDown={(event) => event.key === "Enter" && saveTitle()} autoFocus />
+                        <Input className="canvas-project-title-input" value={editingTitle} onClick={(event) => event.stopPropagation()} onChange={(event) => setEditingTitle(event.target.value)} onKeyDown={(event) => {
+                            if (isComposingKeyEvent(event.nativeEvent)) return;
+                            if (event.key === "Enter") saveTitle();
+                        }} autoFocus />
                     ) : (
                         <button
                             type="button"

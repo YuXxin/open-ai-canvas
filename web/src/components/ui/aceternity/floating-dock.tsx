@@ -1,8 +1,9 @@
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue } from "motion/react";
-import { forwardRef, useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { forwardRef, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import { aceternityMotion } from "@/lib/aceternity-motion";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export type FloatingDockCommand = {
     kind?: "command";
@@ -55,23 +56,9 @@ const TOUCH_DOCK_METRICS: Record<NonNullable<FloatingDockProps["size"]>, DockMet
 export const FloatingDock = forwardRef<HTMLDivElement, FloatingDockProps>(function FloatingDock({ items, size = "default", embedded = false, className, style, ariaLabel = "画布工具", showLabels = false }, forwardedRef) {
     const mouseX = useMotionValue(Number.POSITIVE_INFINITY);
     const reducedMotion = useReducedMotion();
-    const [coarsePointer, setCoarsePointer] = useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
+    const coarsePointer = useMediaQuery("(pointer: coarse)");
     // 窄屏下 dock 按钮总宽易超出可用宽度：此时允许横向滚动并禁用放大（放大依赖 overflow-visible，与滚动互斥）
-    const [narrow, setNarrow] = useState(() => (typeof window !== "undefined" ? window.innerWidth < 768 : false));
-
-    useEffect(() => {
-        const media = window.matchMedia("(pointer: coarse)");
-        const update = () => setCoarsePointer(media.matches);
-        update();
-        media.addEventListener("change", update);
-        return () => media.removeEventListener("change", update);
-    }, []);
-
-    useEffect(() => {
-        const update = () => setNarrow(window.innerWidth < 768);
-        window.addEventListener("resize", update);
-        return () => window.removeEventListener("resize", update);
-    }, []);
+    const narrow = useMediaQuery("(width < 768px)");
 
     // scrollable 场景（触屏或窄屏）禁用放大并允许横向滚动，保证按钮始终可达
     const scrollable = coarsePointer || narrow;

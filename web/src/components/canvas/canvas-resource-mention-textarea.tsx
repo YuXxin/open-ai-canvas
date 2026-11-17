@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { ArrowLeft, ChevronRight, FileText, Folder, Image as ImageIcon, Music2, Pencil, Search, Sparkles, UserRound, Video } from "lucide-react";
 
 import { canvasThemes } from "@/lib/canvas-theme";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 import { useThemeStore } from "@/stores/use-theme-store";
 import { buildAssetMentionReferences, canvasResourceMentionToken, type CanvasResourceReference } from "@/lib/canvas/canvas-resource-references";
 import { useAssetStore, type AssetCategory } from "@/stores/use-asset-store";
@@ -307,7 +308,7 @@ export const CanvasResourceMentionTextarea = forwardRef<HTMLTextAreaElement, Pro
                         props.onDrop?.(event as unknown as React.DragEvent<HTMLTextAreaElement>);
                     }}
                     onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-                        if (event.key === "Enter" && (event.nativeEvent.isComposing || composingRef.current)) return;
+                        if (composingRef.current || isComposingKeyEvent(event.nativeEvent)) return;
                         if (mention && candidates.length) {
                             if (event.key === "ArrowDown") {
                                 event.preventDefault();
@@ -401,7 +402,7 @@ export const CanvasResourceMentionTextarea = forwardRef<HTMLTextAreaElement, Pro
                     props.onCompositionEnd?.(event);
                 }}
                 onKeyDown={(event) => {
-                    if (event.key === "Enter" && (event.nativeEvent.isComposing || composingRef.current)) return;
+                    if (composingRef.current || isComposingKeyEvent(event.nativeEvent)) return;
                     if (mention && candidates.length) {
                         if (event.key === "ArrowDown") {
                             event.preventDefault();
@@ -580,6 +581,7 @@ function MentionMenu({ anchor, connectedReferences, assetReferences, filteredRef
                     onChange={(event) => onQueryChange(event.target.value)}
                     onPointerDown={(event) => event.stopPropagation()}
                     onKeyDown={(event) => {
+                        if (isComposingKeyEvent(event.nativeEvent)) return;
                         if (event.key === "Escape") {
                             event.preventDefault();
                             onClose();

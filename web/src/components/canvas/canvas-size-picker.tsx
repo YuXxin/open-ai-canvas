@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Select } from "antd";
 
 import { cn } from "@/lib/utils";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 
 const sizeOptions = ["auto", "1:1", "3:2", "2:3", "4:3", "3:4", "16:9", "9:16"];
 
@@ -57,6 +58,7 @@ export function CanvasSizePicker({ value, className, onChange }: CanvasSizePicke
                     if (search.trim()) selectSize(search);
                 }}
                 onInputKeyDown={(event) => {
+                    if (isComposingKeyEvent(event.nativeEvent)) return;
                     if (event.key === "Enter" && search.trim()) selectSize(search);
                 }}
             />

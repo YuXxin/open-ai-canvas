@@ -6,6 +6,7 @@ import { CometCard } from "@/components/ui/aceternity/comet-card";
 import { CanvasFolderPreview } from "@/components/canvas/canvas-folder-preview";
 import { FRAME_HEADER_HEIGHT, FRAME_PADDING, isCanvasFolderNode } from "@/lib/canvas/canvas-frame";
 import { canvasThemes, type CanvasTheme } from "@/lib/canvas-theme";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 import { useThemeStore } from "@/stores/use-theme-store";
 import { CanvasNodeType, type CanvasFolderStyle, type CanvasFolderTheme, type CanvasNodeData, type Position } from "@/types/canvas";
 
@@ -224,6 +225,7 @@ export const CanvasFrameNode = React.memo(function CanvasFrameNode({
                             onBlur={commitTitle}
                             onMouseDown={(event) => event.stopPropagation()}
                             onKeyDown={(event) => {
+                                if (isComposingKeyEvent(event.nativeEvent)) return;
                                 if (event.key === "Enter") commitTitle();
                                 if (event.key === "Escape") {
                                     setTitle(data.title);

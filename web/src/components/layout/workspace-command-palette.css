@@ -1,0 +1,24 @@
+.workspace-command-palette {
+    width: min(36rem, calc(100% - var(--space-8)));
+    max-width: none;
+    max-height: calc(100dvh - var(--space-8));
+    margin-inline: auto;
+    margin-block: min(7rem, 12dvh) 0;
+    padding: 0;
+    overflow: auto;
+}
+
+.workspace-command-palette:modal {
+    overscroll-behavior: contain;
+}
+
+.workspace-command-palette::backdrop {
+    background: color-mix(in srgb, var(--background) 40%, transparent);
+    backdrop-filter: blur(4px);
+    overflow: hidden;
+    overscroll-behavior: contain;
+}
+
+.workspace-command-palette-results {
+    max-height: min(20rem, 60dvh);
+}

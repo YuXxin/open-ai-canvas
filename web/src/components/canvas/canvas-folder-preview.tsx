@@ -5,6 +5,7 @@ import { FileAudio, FileText, MoreHorizontal, Pencil, Plus, SlidersHorizontal, S
 import { CANVAS_FOLDER_THEME_OPTIONS, resolveCanvasFolderTheme, resolveCanvasFolderThemeCover } from "@/lib/canvas/canvas-folder-theme";
 import type { CanvasFolderStyle, CanvasFolderTheme, CanvasNodeData } from "@/types/canvas";
 import { CanvasNodeType } from "@/types/canvas";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 
 const FOLDER_STYLE_OPTIONS: Array<{ key: CanvasFolderStyle; label: string }> = [
     { key: "glass", label: "流光玻璃" },
@@ -104,6 +105,7 @@ export const CanvasFolderPreview = React.memo(function CanvasFolderPreview({
                             onBlur={commitTitle}
                             onMouseDown={(event) => event.stopPropagation()}
                             onKeyDown={(event) => {
+                                if (isComposingKeyEvent(event.nativeEvent)) return;
                                 if (event.key === "Enter") commitTitle();
                                 if (event.key === "Escape") {
                                     setTitle(data.title);

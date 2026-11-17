@@ -5,6 +5,7 @@ import { ArrowUpRight, BookOpenText, ChevronLeft, ChevronRight, Crosshair, Folde
 import { Link } from "react-router";
 
 import { resolveProjectCanvasStyle } from "@/components/canvas/canvas-style-picker-modal";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 import { getProject, getProjectUnit, type ProjectDetail, type ProjectUnit } from "@/services/api/projects";
 
 export const CANVAS_PROJECT_CHAPTER_DND_TYPE = "application/x-infinite-canvas-project-chapter";
@@ -176,6 +177,7 @@ export function CanvasProjectSidebar({ projectId, detail, onAddChapter, onLocate
                             value={query}
                             onChange={(event) => setQuery(event.target.value)}
                             onKeyDown={(event) => {
+                                if (isComposingKeyEvent(event.nativeEvent)) return;
                                 if (event.key === "Enter") selectFirstSearchResult();
                             }}
                             className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-foreground/28"

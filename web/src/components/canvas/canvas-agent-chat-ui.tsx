@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowUp, CheckCircle2, CircleAlert, ImagePlus, LoaderCircle, RotateCcw, Sparkles, UserRound, Wrench, X, XCircle } from "lucide-react";
 
 import { canvasThemes } from "@/lib/canvas-theme";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 import type { CanvasAgentOperationImpact } from "@/lib/canvas/canvas-agent-ops";
 import type { LocalUser } from "@/stores/use-user-store";
 import { AIMessageMarkdown } from "@/components/ai/ai-message-markdown";
@@ -286,7 +287,7 @@ export function AgentChatComposer({
     // slash 菜单的键盘控制在 capture 阶段拦截（contentEditable/textarea 内部先消费 Enter，外层冒泡拿不到）
     const handleSlashKeyCapture = (event: ReactKeyboardEvent) => {
         if (!slash || !availableSlashSkills.length) return;
-        if (event.nativeEvent.isComposing || event.keyCode === 229) return;
+        if (isComposingKeyEvent(event.nativeEvent)) return;
         if (event.key === "ArrowDown") {
             event.preventDefault();
             event.stopPropagation();

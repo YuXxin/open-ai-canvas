@@ -7,6 +7,7 @@ import { exportCanvasProjects } from "@/lib/canvas/canvas-export";
 import { useCanvasStore, type CanvasProject } from "@/stores/canvas/use-canvas-store";
 import { useCanvasUiStore } from "@/stores/canvas/use-canvas-ui-store";
 import { cn } from "@/lib/utils";
+import { isComposingKeyEvent } from "@/lib/keyboard";
 
 type CanvasFolderCardProps = {
     project: CanvasProject;
@@ -57,6 +58,7 @@ export function CanvasFolderCard({ project, projectName, onClick }: CanvasFolder
                                 onClick={(event) => event.stopPropagation()}
                                 onBlur={saveTitle}
                                 onKeyDown={(event) => {
+                                    if (isComposingKeyEvent(event.nativeEvent)) return;
                                     if (event.key === "Enter") saveTitle();
                                     if (event.key === "Escape") stopEditing();
                                 }}
